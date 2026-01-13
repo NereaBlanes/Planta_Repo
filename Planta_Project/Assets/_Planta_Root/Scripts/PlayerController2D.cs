@@ -13,12 +13,6 @@ public class PlayerController2D : MonoBehaviour
     [SerializeField] float groundCheckRadius; //Define el radio del círculo detector de suelo
     [SerializeField] LayerMask groundLayer; //Define la capa que puede tocar el detector de suelo
 
-    [Header("Shoot Configuration")]
-    [SerializeField] GameObject projectile; //Ref al prefab de la bala
-    [SerializeField] Transform shootPoint; //Ref a la posición desde la que se dispara
-    [SerializeField] float shootCooldown = 2f;
-    bool canShoot;
-
     //Variables de referencia general
     Rigidbody2D playerRb; //Almacén del rigidbody del player
     Animator anim; //Almacén del controlador de animaciones del player
@@ -32,7 +26,6 @@ public class PlayerController2D : MonoBehaviour
         anim = GetComponent<Animator>();
         input = GetComponent<PlayerInput>();
         canAttack = true;
-        canShoot = true;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -75,22 +68,8 @@ public class PlayerController2D : MonoBehaviour
     void Jump()
     {
         playerRb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);
+        AudioManager.Instance.PlaySFX(3);
     }
-
-    void Shoot()
-    {
-        canShoot = false;
-        GameObject actualProjectile = Instantiate(projectile, shootPoint.position, Quaternion.identity);
-        Projectile projectileScript = actualProjectile.GetComponent<Projectile>();
-        projectileScript.isFacingRight = isFacingRight; //Igualar la orientación de la bala a la del player
-        Invoke(nameof(ResetShoot), shootCooldown); //se espera el tiempo de cooldown y entonces reseta el shoot
-    }
-
-    void ResetShoot()
-    {
-        canShoot = true; //Devuelve la posibilidad de disparar
-    }
-
     IEnumerator Attack()
     {
         canAttack = false; //Quitar la posibilidad de atacar
@@ -130,12 +109,6 @@ public class PlayerController2D : MonoBehaviour
     {
         if (context.performed && isGrounded && canAttack) StartCoroutine(Attack());
     }
-    public void OnShoot(InputAction.CallbackContext context)
-    {
-        //Lógica del inicio del disparo
-        if (context.performed && canShoot) Shoot();
-    }
-
 
     #endregion
 }
