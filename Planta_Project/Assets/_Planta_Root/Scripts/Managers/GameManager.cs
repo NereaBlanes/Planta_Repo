@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     public int playerHeatlh;
     public float maxHealth = 100;
     public int playerPoints;
+    public int winPoints;
 
     private void Awake()
     {
@@ -39,5 +40,12 @@ public class GameManager : MonoBehaviour
     {
        if (playerHeatlh < 0) playerHeatlh = 0;
     }
+    
+    //Sistema de puntos
+    public void PointsUp(int gain)
+    {
+        playerPoints += gain;
+    }
+
 }
 
