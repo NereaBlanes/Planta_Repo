@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
             if (instance == null) Debug.Log("No hay GameManager");
             return instance;
         }
+
     }
     //Fin del singleton
 
@@ -21,6 +23,7 @@ public class GameManager : MonoBehaviour
     public float maxHealth = 100;
     public int playerPoints;
     public int winPoints;
+    public GameObject winPortal;
 
     private void Awake()
     {
@@ -39,7 +42,13 @@ public class GameManager : MonoBehaviour
         private void Update()
     {
        if (playerHeatlh < 0) playerHeatlh = 0;
+       if (playerPoints >= winPoints)
+        {
+            winPortal.SetActive(true);
+        }
+
     }
+       
     
     //Sistema de puntos
     public void PointsUp(int gain)
