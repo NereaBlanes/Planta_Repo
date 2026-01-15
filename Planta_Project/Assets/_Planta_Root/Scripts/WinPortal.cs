@@ -9,7 +9,7 @@ public class WinPortal : MonoBehaviour
     // Update is called once per frame
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("WinPortal"))
+        if (collision.gameObject.CompareTag("Player"))
         {
             LoadScene(sceneToLoad);
         }
