@@ -12,6 +12,7 @@ public class PlayerController2D : MonoBehaviour
     [SerializeField] Transform groundCheck; //Posición del detector del suelo
     [SerializeField] float groundCheckRadius; //Define el radio del círculo detector de suelo
     [SerializeField] LayerMask groundLayer; //Define la capa que puede tocar el detector de suelo
+    [SerializeField] GameObject attackHitbox;
 
     //Variables de referencia general
     Rigidbody2D playerRb; //Almacén del rigidbody del player
@@ -76,7 +77,7 @@ public class PlayerController2D : MonoBehaviour
         float actualSpeed = speed; //Guardamos la velocidad actual para devolerla luego
         speed = 0; //Con velocidad 0 el personaje se queda quieto
         anim.SetTrigger("Attack");
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(0.5f);
         speed = actualSpeed;
         canAttack = true;
         //Devolvemos velocidad y capacidad de ataque al jugador, se acaba la corrutina
