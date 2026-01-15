@@ -2,14 +2,26 @@ using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
-    [SerializeField] int maxHealth = 3;
-    int currentHealth;
+    [SerializeField] private int maxHealth = 3; // Vida máxima
+    private int currentHealth;
 
     private void Awake()
     {
         currentHealth = maxHealth;
     }
-    public void TakeDamage(int damage)
+
+    // Detectar hitbox externa
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Verifica si la hitbox tiene la etiqueta "Weapon"
+        if (collision.CompareTag("Weapon"))
+        {
+            TakeDamage(1); // Restar 1 de vida (puedes cambiar el valor)
+        }
+    }
+
+    // Aplica el daño
+    private void TakeDamage(int damage)
     {
         currentHealth -= damage;
 
@@ -18,7 +30,8 @@ public class EnemyHealth : MonoBehaviour
             Die();
         }
     }
-    void Die()
+
+    private void Die()
     {
         Destroy(gameObject);
     }
