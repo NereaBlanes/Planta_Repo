@@ -39,7 +39,7 @@ public class PlayerHealth : MonoBehaviour
         if (controller != null) controller.enabled = false;
 
         // Inicia la corrutina para reiniciar
-        StartCoroutine(RestartAfterDelay(3f));
+        StartCoroutine(RestartAfterDelay(2.5f));
     }
 
     IEnumerator RestartAfterDelay(float delay)

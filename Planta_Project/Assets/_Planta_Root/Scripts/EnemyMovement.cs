@@ -2,105 +2,109 @@ using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour
 {
-    [Header("Referencias")]
+    [Header("References")]
     public Transform player;
+    public Transform pointA;
+    public Transform pointB;
 
-    [Header("Movimiento")]
-    public float speed = 2f;
+    [Header("Movement")]
+    public float patrolSpeed = 2f;
+    public float chaseSpeed = 3f;
+
+    [Header("Detection")]
     public float visionRange = 6f;
-    public float stoppingDistance = 1.8f;
+    public float stoppingDistance = 3.7f;
 
-    [Header("Ataque")]
-    public int damage = 1;
+    [Header("Attack")]
     public float attackCooldown = 1f;
+    public int damage = 1;
 
     Rigidbody2D rb;
-    bool facingRight = true;
-    float lastAttackTime;
+
+    Vector2 worldPointA;
+    Vector2 worldPointB;
+    Vector2 currentTarget;
+
+    bool chasingPlayer;
+    float nextAttackTime;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        worldPointA = transform.TransformPoint(pointA.localPosition);
+        worldPointB = transform.TransformPoint(pointB.localPosition);
+
+        currentTarget = worldPointB;
     }
 
     void FixedUpdate()
     {
-        if (player == null)
-        {
-            Debug.LogWarning("Player NO asignado");
-            return;
-        }
+        if (player == null) return;
 
-        float distance = Vector2.Distance(rb.position, player.position);
-        Debug.Log("DISTANCIA AL JUGADOR: " + distance);
+        float distanceToPlayer = Vector2.Distance(rb.position, player.position);
 
-        if (distance <= visionRange)
-        {
-            Move(distance);
-            Flip();
-        }
+        chasingPlayer = distanceToPlayer <= visionRange;
+
+        if (chasingPlayer)
+            Chase(distanceToPlayer);
         else
-        {
-            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-        }
+            Patrol();
+
+        Flip();
     }
 
-    void Move(float distance)
+    // ------------------ PATRULLA ------------------
+    void Patrol()
+    {
+        Vector2 dir = (currentTarget - rb.position).normalized;
+        rb.linearVelocity = new Vector2(dir.x * patrolSpeed, rb.linearVelocity.y);
+
+        if (Vector2.Distance(rb.position, currentTarget) < 0.2f)
+            currentTarget = currentTarget == worldPointA ? worldPointB : worldPointA;
+    }
+
+    // ------------------ PERSEGUIR ------------------
+    void Chase(float distance)
     {
         if (distance > stoppingDistance)
         {
-            float dir = Mathf.Sign(player.position.x - rb.position.x);
-            rb.linearVelocity = new Vector2(dir * speed, rb.linearVelocity.y);
-            Debug.Log("MOVI�NDOME HACIA EL JUGADOR");
+            Vector2 dir = (player.position - transform.position).normalized;
+            rb.linearVelocity = new Vector2(dir.x * chaseSpeed, rb.linearVelocity.y);
         }
         else
         {
-            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-            Debug.Log("EN RANGO DE ATAQUE");
+            rb.linearVelocity = Vector2.zero;
             Attack();
         }
     }
 
+    // ------------------ ATAQUE ------------------
     void Attack()
     {
-        if (Time.time < lastAttackTime + attackCooldown)
-        {
-            Debug.Log("COOLDOWN...");
-            return;
-        }
+        if (Time.time < nextAttackTime) return;
 
-        Debug.Log("INTENTO ATACAR");
+        nextAttackTime = Time.time + attackCooldown;
 
-        PlayerHealth ph = player.GetComponent<PlayerHealth>();
-        if (ph != null)
-        {
-            Debug.Log("HAGO DA�O AL JUGADOR");
-            ph.TakeDamage(damage);
-        }
-        else
-        {
-            Debug.LogError("PlayerHealth NO encontrado en el Player");
-        }
+        Debug.Log("ENEMIGO ATACA");
 
-        lastAttackTime = Time.time;
+        PlayerHealth health = player.GetComponent<PlayerHealth>();
+        if (health != null)
+            health.TakeDamage(damage);
     }
 
+    // ------------------ GIRAR ------------------
     void Flip()
     {
-        if (player.position.x > transform.position.x && !facingRight)
-            DoFlip();
-        else if (player.position.x < transform.position.x && facingRight)
-            DoFlip();
+        float targetX = chasingPlayer ? player.position.x : currentTarget.x;
+
+        if (targetX > transform.position.x)
+            transform.localScale = new Vector3(1, 1, 1);
+        else
+            transform.localScale = new Vector3(-1, 1, 1);
     }
 
-    void DoFlip()
-    {
-        facingRight = !facingRight;
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
-    }
-
+    // ------------------ DEBUG ------------------
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
