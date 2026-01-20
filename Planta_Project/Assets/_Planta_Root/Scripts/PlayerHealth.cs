@@ -32,13 +32,15 @@ public class PlayerHealth : MonoBehaviour
 
         if (anim != null)
         {
-            anim.SetTrigger("Dead");
+            anim.SetTrigger("Dead"); 
         }
 
         PlayerController2D controller = GetComponent<PlayerController2D>();
-        if (controller != null) controller.enabled = false;
+        if (controller != null)
+        {
+            controller.Die(); 
+        }
 
-        // Inicia la corrutina para reiniciar
         StartCoroutine(RestartAfterDelay(2.5f));
     }
 
