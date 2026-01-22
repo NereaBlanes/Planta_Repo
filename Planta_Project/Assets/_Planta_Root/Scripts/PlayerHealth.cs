@@ -5,8 +5,11 @@ using System.Collections;
 public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 5;
+    public float invulnerabilityTime = 0.4f;
+
     int currentHealth;
     bool isDead = false;
+    bool isInvulnerable = false;
 
     private Animator anim;
 
@@ -18,8 +21,21 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (isDead || isInvulnerable) return;
+
         currentHealth -= damage;
         Debug.Log("PLAYER VIDA: " + currentHealth);
+
+        if (currentHealth > 0)
+        {
+            if (anim != null)
+            {
+                anim.SetTrigger("Hurt");
+            }
+
+            // Activar invulnerabilidad
+            StartCoroutine(InvulnerabilityCoroutine());
+        }
 
         if (currentHealth <= 0)
         {
@@ -30,8 +46,14 @@ public class PlayerHealth : MonoBehaviour
                 isDead = true;
                 Die();
             }
-            
         }
+    }
+
+    IEnumerator InvulnerabilityCoroutine()
+    {
+        isInvulnerable = true;
+        yield return new WaitForSeconds(invulnerabilityTime);
+        isInvulnerable = false;
     }
 
     void Die()
@@ -40,13 +62,13 @@ public class PlayerHealth : MonoBehaviour
 
         if (anim != null)
         {
-            anim.SetTrigger("Dead"); 
+            anim.SetTrigger("Dead");
         }
 
         PlayerController2D controller = GetComponent<PlayerController2D>();
         if (controller != null)
         {
-            controller.Die(); 
+            controller.Die();
         }
 
         StartCoroutine(RestartAfterDelay(2.5f));
