@@ -114,6 +114,7 @@ public class PlayerController2D : MonoBehaviour
 
         anim.SetBool("Run", false);
         anim.SetBool("Jump", false);
+        anim.SetTrigger("Death");
     }
 
     #region Input Methods

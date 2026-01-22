@@ -6,6 +6,7 @@ public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 5;
     int currentHealth;
+    bool isDead = false;
 
     private Animator anim;
 
@@ -22,7 +23,14 @@ public class PlayerHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            Die();
+            currentHealth = 0;
+
+            if (!isDead)
+            {
+                isDead = true;
+                Die();
+            }
+            
         }
     }
 
