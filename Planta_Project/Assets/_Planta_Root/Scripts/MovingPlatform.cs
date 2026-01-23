@@ -3,53 +3,59 @@ using UnityEngine;
 public class MovingPlatform : MonoBehaviour
 {
     [Header("Waypoints & Movement Configuration")]
-    [SerializeField] float speed;
-    [SerializeField] Transform[] points;
-    [SerializeField] int startingPoint;
+    [SerializeField] float speed; //Velocidad de la platforma
+    [SerializeField] Transform[] points; //Array de puntos a perseguir por la plataforma (mínimo 2)
+    [SerializeField] int startingPoint; //Define la posición inicial de la plataforma
 
-    int i;
-    Rigidbody2D rb;
-    Vector2 lastPosition;
+    int i; //Índice numérico = número de punto a perseguir (punto actual +1, al llegar al final 0)
 
-    void Awake()
-    {
-        rb = GetComponent<Rigidbody2D>();
-    }
-
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        i = startingPoint;
-        rb.position = points[i].position;
-        lastPosition = rb.position;
+        i = startingPoint; //Definir el primer punto a perseguir
+        //Setear la posición inicial de la plataforma a la posición del starting point
+        transform.position = points[startingPoint].position;
     }
 
-    void FixedUpdate()
+    // Update is called once per frame
+    void Update()
     {
-        Vector2 target = points[i].position;
-        Vector2 newPos = Vector2.MoveTowards(rb.position, target, speed * Time.fixedDeltaTime);
-        rb.MovePosition(newPos);
+        PlatformMovement();
+    }
 
-        if (Vector2.Distance(rb.position, target) < 0.02f)
+    void PlatformMovement()
+    {
+        if (Vector2.Distance(transform.position, points[i].position) < 0.02f)
         {
-            i++;
-            if (i >= points.Length)
-                i = 0;
+            i++; //Sumar 1 a i = definir un nuevo punto a alcanzar
+            if (i == points.Length) //Chequear si i vale lo que mide el array
+            {
+                i = 0; //Resetea el valor de i para resetear el circuito
+            }
         }
-
-        lastPosition = rb.position;
+        //Mueve la plataforma a la posición que vale i actualmente
+        //i define la "balda dentro de la estantería" del array que contiene una posición concreta
+        transform.position = Vector2.MoveTowards(transform.position, points[i].position, speed * Time.deltaTime);
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!collision.collider.CompareTag("Player")) return;
-
-        // Movimiento real de la plataforma
-        Vector2 platformVelocity = (rb.position - lastPosition) / Time.fixedDeltaTime;
-
-        Rigidbody2D playerRb = collision.collider.GetComponent<Rigidbody2D>();
-        if (playerRb != null)
+        if (collision.collider.CompareTag("Player"))
         {
-            playerRb.position += platformVelocity * Time.fixedDeltaTime;
+            if (transform.position.y < collision.transform.position.y)
+            {
+                //El transform del objeto se hace hijo de la plataforma
+                collision.transform.SetParent(transform);
+            }
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Player"))
+        {
+            //El transform del objeto tiene como padre NULL = ausencia de valor
+            collision.transform.SetParent(null);
         }
     }
 }
